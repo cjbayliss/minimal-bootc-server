@@ -7,7 +7,7 @@ RUN dnf -y install \
         NetworkManager \
         NetworkManager-wifi \
         openssh-server \
-        wpa_supplicant \
+        wpa_supplicant
 
 # needed for brew
 RUN dnf -y install \
