@@ -2,12 +2,20 @@ FROM quay.io/fedora/fedora-bootc:44
 
 RUN dnf -y install \
         glibc-langpack-en \
-        iwlwifi-mvm-firmware \
         NetworkManager \
         NetworkManager-wifi \
         nftables \
         openssh-server \
         wpa_supplicant
+
+# wifi firmware
+RUN dnf -y install \
+        atheros-firmware \
+        brcmfmac-firmware \
+        iwlwifi-mvm-firmware \
+        mt7xxx-firmware \
+        nxpwireless-firmware \
+        realtek-firmware
 
 # needed for brew
 RUN dnf -y install \
