@@ -18,10 +18,10 @@ permissions:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Compute image name and tags
         id: meta
@@ -44,7 +44,7 @@ jobs:
           } >> "${GITHUB_OUTPUT}"
 
       - name: Log in to GHCR
-        uses: redhat-actions/podman-login@v1
+        uses: redhat-actions/podman-login@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -52,16 +52,17 @@ jobs:
 
       - name: Build image
         id: build
-        uses: redhat-actions/buildah-build@v2
+        uses: redhat-actions/buildah-build@v3
         with:
           containerfiles: ./Containerfile
           image: ${{ steps.meta.outputs.image }}
           tags: ${{ steps.meta.outputs.tags }}
           arch: amd64
+          squash: false
 
       - name: Push to GHCR
         id: push
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
