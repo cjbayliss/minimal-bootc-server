@@ -2,6 +2,7 @@ FROM quay.io/fedora/fedora-bootc:44
 
 RUN dnf -y install \
         git \
+        glibc-langpack-en \
         iwlwifi-mvm-firmware \
         NetworkManager \
         NetworkManager-wifi \
