@@ -6,6 +6,7 @@ RUN dnf -y install \
         NetworkManager-wifi \
         nftables \
         openssh-server \
+        rsync \
         wpa_supplicant
 
 # wifi firmware
