@@ -67,13 +67,3 @@ jobs:
           image: ${{ steps.build.outputs.image }}
           tags: ${{ steps.build.outputs.tags }}
           registry: ${{ env.REGISTRY }}
-
-      - name: Job summary
-        run: |
-          {
-            echo "## Published image"
-            echo '```'
-            echo '${{ steps.push.outputs.registry-path }}'
-            echo '```'
-            echo "Digest: \`${{ steps.push.outputs.digest }}\`"
-          } >> "${GITHUB_STEP_SUMMARY}"
