@@ -8,6 +8,14 @@ RUN dnf -y install \
         NetworkManager-wifi \
         openssh-server \
         wpa_supplicant \
+
+# needed for brew
+RUN dnf -y install \
+        automake \
+        gcc \
+        gcc-c++ \
+        kernel-devel \
+        make \
     && dnf clean all \
     && rm -rf /var/cache
 
