@@ -29,9 +29,15 @@ RUN dnf -y install \
     && dnf clean all \
     && rm -rf /var/cache
 
+# systemd-resolved as the mDNS responder: answers <hostname>.local (udp/5353)
+RUN mkdir -p /etc/systemd/resolved.conf.d \
+    && printf '[Resolve]\nMulticastDNS=yes\n' > /etc/systemd/resolved.conf.d/90-mdns.conf
+
 COPY nftables.nft /etc/sysconfig/nftables.conf
 RUN systemctl enable nftables.service
 
 RUN systemctl enable sshd.service
+
+RUN systemctl enable systemd-resolved.service
 
 RUN ln -sf /dev/null /usr/lib/systemd/system/systemd-remount-fs.service
