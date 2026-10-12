@@ -1,0 +1,78 @@
+name: build-and-publish
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  # Rebuild weekly so hosts track fresh base-image/package updates
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute image name and tags
+        id: meta
+        run: |
+          # ghcr.io requires lowercase repository names
+          image="${GITHUB_REPOSITORY,,}"
+          tags="latest
+          44
+          sha-${GITHUB_SHA::7}"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            tags="${tags}
+          ${GITHUB_REF_NAME}
+          ${GITHUB_REF_NAME#v}"
+          fi
+          {
+            echo "image=${image}"
+            echo "tags<<EOF"
+            echo "${tags}"
+            echo "EOF"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Log in to GHCR
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image
+        id: build
+        uses: redhat-actions/buildah-build@v2
+        with:
+          containerfiles: ./Containerfile
+          image: ${{ steps.meta.outputs.image }}
+          tags: ${{ steps.meta.outputs.tags }}
+          arch: amd64
+
+      - name: Push to GHCR
+        id: push
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ${{ steps.build.outputs.image }}
+          tags: ${{ steps.build.outputs.tags }}
+          registry: ${{ env.REGISTRY }}
+
+      - name: Job summary
+        run: |
+          {
+            echo "## Published image"
+            echo '```'
+            echo '${{ steps.push.outputs.registry-path }}'
+            echo '```'
+            echo "Digest: \`${{ steps.push.outputs.digest }}\`"
+          } >> "${GITHUB_STEP_SUMMARY}"
