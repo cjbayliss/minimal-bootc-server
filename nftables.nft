@@ -1,0 +1,30 @@
+#!/usr/sbin/nft -f
+
+# clear all prior state
+flush ruleset
+
+# basic firewall
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+        ct state invalid drop comment "drop invalid"
+        ct state { established, related } accept comment "accept established and related"
+        iifname "lo" accept comment "accept loopback"
+        iifname != "lo" ip daddr 127.0.0.1/8 drop comment "drop ipv4 connections to loopback not from loopback"
+        iifname != "lo" ip6 daddr ::1 drop comment "drop ipv6 connections to loopback not from loopback"
+
+        # ssh
+        tcp dport 22 accept comment "ssh"
+
+        # icmp: replies come back via established/related; this allows inbound ping
+        icmp type echo-request accept comment "allow ipv4 ping"
+
+        # icmpv6: ipv6 breaks without neighbour discovery, router adverts and PMTUD
+        icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem,
+                      echo-request, nd-router-solicit, nd-router-advert,
+                      nd-neighbor-solicit, nd-neighbor-advert } accept comment "essential icmpv6"
+    }
+
+    chain forward { type filter hook forward priority 0; policy drop; }
+    chain output { type filter hook output priority 0; policy accept; }
+}
