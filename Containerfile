@@ -10,3 +10,5 @@ RUN dnf -y install \
     && rm -rf /var/cache
 
 RUN systemctl enable sshd.service
+
+RUN ln -sf /dev/null /usr/lib/systemd/system/systemd-remount-fs.service
