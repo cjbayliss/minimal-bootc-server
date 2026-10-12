@@ -1,11 +1,12 @@
 FROM quay.io/fedora/fedora-bootc:44
 
 RUN dnf -y install \
+        git \
+        iwlwifi-mvm-firmware \
         NetworkManager \
         NetworkManager-wifi \
-        wpa_supplicant \
-        iwlwifi-mvm-firmware \
         openssh-server \
+        wpa_supplicant \
     && dnf clean all \
     && rm -rf /var/cache
 
